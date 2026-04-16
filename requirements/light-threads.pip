@@ -92,9 +92,9 @@ dnspython==2.8.0 \
     --hash=sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af \
     --hash=sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f
     # via eventlet
-eventlet==0.40.4 \
-    --hash=sha256:6326c6d0bf55810bece151f7a5750207c610f389ba110ffd1541ed6e5215485b \
-    --hash=sha256:69bef712b1be18b4930df6f0c495d2a882bf7b63aa111e7b6eeff461cfcaf26f
+eventlet==0.41.0 \
+    --hash=sha256:35df85f0ccd3e73effb6fd9f1ceae46b500b966c7da1817289c323a307bd397b \
+    --hash=sha256:bc22396093cb4119ff7007776be6a5348a613ccd42eeb0f9519853a6efcbcabe
     # via -r requirements/light-threads.in
 gevent==25.9.1 \
     --hash=sha256:012a44b0121f3d7c800740ff80351c897e85e76a7e4764690f35c5ad9ec17de5 \
