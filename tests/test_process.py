@@ -969,6 +969,16 @@ class EnvironmentTest(CoverageTest):
         actual = self.run_command(f"python {cov_main} run run_me.py")
         self.assert_tryexecfile_output(expected, actual)
 
+    @pytest.mark.skipif(env.WINDOWS, reason="Windows can't make symlinks")
+    def test_coverage_in_symlink_is_like_python(self) -> None:
+        # https://github.com/coveragepy/coveragepy/issues/2157
+        self.make_file("real/run_me.py", TRY_EXECFILE_CODE)
+        os.mkdir("link")
+        os.symlink("../real/run_me.py", "link/run_me.py")
+        expected = self.run_command("python link/run_me.py")
+        actual = self.run_command("coverage run link/run_me.py")
+        self.assert_tryexecfile_output(expected, actual)
+
     @pytest.mark.skipif(env.PYVERSION < (3, 11), reason="PYTHONSAFEPATH is new in 3.11")
     @pytest.mark.skipif(
         env.WINDOWS,

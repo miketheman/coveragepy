@@ -23,9 +23,13 @@ upgrading your version of coverage.py.
 Unreleased
 ----------
 
+- Fix: running a Python file through a symlink now sets the sys.path correctly,
+  matching regular Python behavior. Fixes `issue 2157`_.
+
 - We are no longer testing eventlet support. Eventlet issues stern deprecation
   warnings that break our tests. Our support code is still there.
 
+.. _issue 2157: https://github.com/coveragepy/coveragepy/issues/2157
 
 .. start-releases
 
