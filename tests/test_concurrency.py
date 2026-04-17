@@ -166,11 +166,8 @@ SIMPLE = """
 
 def cant_trace_msg(concurrency: str, the_module: ModuleType | None) -> str | None:
     """What might coverage.py say about a concurrency setting and imported module?"""
-    # In the concurrency choices, "multiprocessing" doesn't count, so remove it.
-    if "multiprocessing" in concurrency:
-        parts = concurrency.split(",")
-        parts.remove("multiprocessing")
-        concurrency = ",".join(parts)
+    # In the concurrency choices, "multiprocessing" doesn't count.
+    assert "multiprocessing" not in concurrency
 
     if testenv.SYS_MON and concurrency:
         expected_out = f"Can't use core=sysmon: it doesn't support concurrency={concurrency}"
@@ -459,7 +456,6 @@ class MultiprocessingTest(CoverageTest):
         self,
         code: str,
         expected_out: str | None,
-        the_module: ModuleType | None,
         nprocs: int,
         start_method: str,
         concurrency: str = "multiprocessing",
@@ -478,30 +474,24 @@ class MultiprocessingTest(CoverageTest):
 
         cmd = f"coverage run {args} multi.py {start_method}"
         _, out = self.run_command_status(cmd)
-        expected_cant_trace = cant_trace_msg(concurrency, the_module)
+        assert out.rstrip() == expected_out
+        assert len(glob.glob(".coverage.*")) == nprocs + 1
 
-        if expected_cant_trace is not None:
-            assert expected_cant_trace in out
-            pytest.skip(f"Can't test: {expected_cant_trace}")
-        else:
-            assert out.rstrip() == expected_out
-            assert len(glob.glob(".coverage.*")) == nprocs + 1
-
-            out = self.run_command("coverage combine")
-            out_lines = out.splitlines()
-            assert len(out_lines) == nprocs + 1
-            assert all(
-                re.fullmatch(
-                    rf"(Combined data file|Skipping duplicate data) \.coverage{SUFFIX_PATTERN}",
-                    line,
-                )
-                for line in out_lines
+        out = self.run_command("coverage combine")
+        out_lines = out.splitlines()
+        assert len(out_lines) == nprocs + 1
+        assert all(
+            re.fullmatch(
+                rf"(Combined data file|Skipping duplicate data) \.coverage{SUFFIX_PATTERN}",
+                line,
             )
-            assert len(glob.glob(".coverage.*")) == 0
-            out = self.run_command("coverage report -m")
+            for line in out_lines
+        )
+        assert len(glob.glob(".coverage.*")) == 0
+        out = self.run_command("coverage report -m")
 
-            last_line = self.squeezed_lines(out)[-1]
-            assert re.search(r"TOTAL \d+ 0 100%", last_line)
+        last_line = self.squeezed_lines(out)[-1]
+        assert re.search(r"TOTAL \d+ 0 100%", last_line)
 
     def test_multiprocessing_simple(self, start_method: str) -> None:
         nprocs = 3
@@ -512,7 +502,6 @@ class MultiprocessingTest(CoverageTest):
         self.try_multiprocessing_code(
             code,
             expected_out,
-            threading,
             nprocs,
             start_method=start_method,
         )
@@ -526,7 +515,6 @@ class MultiprocessingTest(CoverageTest):
         self.try_multiprocessing_code(
             code,
             expected_out,
-            threading,
             nprocs,
             args="--append",
             start_method=start_method,
